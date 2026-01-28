@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack } from "@mantine/core";
 import "./global.css";
 
 import { GithubRepo } from "./types/github";
@@ -36,7 +37,7 @@ const NewTab = () => {
     if (token && searchInputRef.current) {
       searchInputRef.current.focus();
     }
-  }, [token, loading]); // Tenta focar quando logar ou terminar de carregar
+  }, [token, loading]);
 
   const loadData = async (authToken: string) => {
     setLoading(true);
@@ -84,78 +85,84 @@ const NewTab = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-indigo-600 flex items-center gap-2">
-            🚀 Dev Dashboard
-          </h1>
-          
-          {token && (
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => loadData(token)}
-                className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-gray-50 rounded-full transition"
-                disabled={loading}
-                title="Atualizar lista"
-              >
-                <svg className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
+    <MantineProvider>
+      <div style={{ backgroundColor: "var(--mantine-color-gray-0)", minHeight: "100vh", paddingBottom: "2rem" }}>
+        {/* Header */}
+        <Paper p="md" shadow="xs" component="header" pos="sticky" top={0} style={{ zIndex: 10 }}>
+          <Container size="xl">
+            <Group justify="space-between">
+              <Group gap="xs">
+                <Title order={3} c="indigo">🚀 Dev Dashboard</Title>
+              </Group>
               
-              <button
-                onClick={handleReset}
-                className="text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-md transition border border-transparent hover:border-red-100"
-              >
-                Sair
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+              {token && (
+                <Group>
+                  <ActionIcon 
+                    variant="light" 
+                    color="indigo" 
+                    size="lg" 
+                    onClick={() => loadData(token)}
+                    loading={loading}
+                    title="Atualizar lista"
+                  >
+                    <svg style={{ width: 20, height: 20 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </ActionIcon>
+                  
+                  <Button 
+                    variant="subtle" 
+                    color="red" 
+                    size="xs" 
+                    onClick={handleReset}
+                  >
+                    Sair
+                  </Button>
+                </Group>
+              )}
+            </Group>
+          </Container>
+        </Paper>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!token ? (
-          <TokenForm 
-            onSave={handleSaveToken} 
-            loading={authLoading} 
-            error={error}
-          />
-        ) : (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-               <div className="relative flex-1 w-full">
-                <svg
-                  className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="Pesquisar repositórios ou organizações..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-transparent border-none text-lg text-gray-800 placeholder-gray-400 focus:ring-0 outline-none"
-                  tabIndex={1}
-                />
-              </div>
-              <div className="text-sm text-gray-500 whitespace-nowrap px-2 border-l border-gray-100 hidden sm:block">
-                {filteredRepos.length} repositórios
-              </div>
-            </div>
-            
-            <RepoGrid repos={filteredRepos} loading={loading} />
-          </div>
-        )}
-      </main>
-    </div>
+        {/* Main Content */}
+        <Container size="xl" mt="xl">
+          {!token ? (
+            <TokenForm 
+              onSave={handleSaveToken} 
+              loading={authLoading} 
+              error={error}
+            />
+          ) : (
+            <Stack gap="lg">
+              <Paper p="md" shadow="sm" radius="md">
+                <Group align="center" gap="md">
+                   <div style={{ flex: 1, position: 'relative' }}>
+                    <TextInput
+                      ref={searchInputRef}
+                      placeholder="Pesquisar repositórios ou organizações..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.currentTarget.value)}
+                      size="md"
+                      leftSection={
+                        <svg style={{ width: 16, height: 16, color: 'gray' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      }
+                      variant="unstyled"
+                    />
+                  </div>
+                  <Text size="sm" c="dimmed" style={{ borderLeft: '1px solid var(--mantine-color-gray-2)', paddingLeft: 10 }} visibleFrom="sm">
+                    {filteredRepos.length} repositórios
+                  </Text>
+                </Group>
+              </Paper>
+              
+              <RepoGrid repos={filteredRepos} loading={loading} />
+            </Stack>
+          )}
+        </Container>
+      </div>
+    </MantineProvider>
   );
 };
 

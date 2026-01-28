@@ -8,6 +8,8 @@
     "build": "tsc && vite build"
   },
   "dependencies": {
+    "@mantine/core": "^8.3.13",
+    "@mantine/hooks": "^8.3.13",
     "@tailwindcss/vite": "^4.1.18",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -18,6 +20,9 @@
     "@types/react-dom": "^18.0.9",
     "@types/webextension-polyfill": "^0.10.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "postcss": "^8.5.6",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
     "typescript": "~5.6.3",
     "vite": "^5.0.0",
     "vite-plugin-web-extension": "^4.0.0",
