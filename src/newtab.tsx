@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./popup.css"; // Using existing styles for now, you can create newtab.css later
+import "./global.css";
 
 const NewTab = () => {
   return (
