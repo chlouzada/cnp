@@ -19,7 +19,7 @@ export async function fetchUserOrgs(token: string): Promise<GithubOrg[]> {
 
 export async function fetchPersonalRepos(token: string): Promise<GithubRepo[]> {
   const response = await fetch(
-    `${BASE_URL}/user/repos?sort=updated&direction=desc&per_page=30&type=owner`,
+    `${BASE_URL}/user/repos?sort=pushed&direction=desc&per_page=30&type=owner`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -29,9 +29,8 @@ export async function fetchPersonalRepos(token: string): Promise<GithubRepo[]> {
 }
 
 export async function fetchOrgRepos(token: string, orgName: string): Promise<GithubRepo[]> {
-  // Aumentei per_page para 20 para trazer mais repositórios
   const response = await fetch(
-    `${BASE_URL}/orgs/${orgName}/repos?sort=updated&direction=desc&per_page=20`,
+    `${BASE_URL}/orgs/${orgName}/repos?sort=pushed&direction=desc&per_page=20`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -43,7 +42,6 @@ export async function fetchOrgRepos(token: string, orgName: string): Promise<Git
 export async function fetchAllRecentRepos(token: string): Promise<GithubRepo[]> {
   const orgs = await fetchUserOrgs(token);
   
-  // Busca repositórios pessoais e das orgs em paralelo
   const repoPromises = [
     fetchPersonalRepos(token),
     ...orgs.map((org) => fetchOrgRepos(token, org.login))
@@ -51,14 +49,38 @@ export async function fetchAllRecentRepos(token: string): Promise<GithubRepo[]> 
   
   const results = await Promise.all(repoPromises);
   
-  // Junta tudo
   const allRepos = results.flat();
 
-  // Remove duplicatas (por segurança) usando um Map com o ID do repo
   const uniqueRepos = Array.from(new Map(allRepos.map(repo => [repo.id, repo])).values());
 
-  // Ordena por updatedAt (o mais recente primeiro)
+  // Ordena por pushed_at
   return uniqueRepos.sort((a, b) => {
-    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    return new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime();
   });
+}
+
+export async function fetchPrCount(token: string, owner: string, name: string): Promise<number> {
+  const query = `
+    query {
+      repository(owner: "${owner}", name: "${name}") {
+        pullRequests(states: OPEN) {
+          totalCount
+        }
+      }
+    }
+  `;
+
+  const response = await fetch("https://api.github.com/graphql", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!response.ok) return 0;
+  
+  const data = await response.json();
+  return data.data?.repository?.pullRequests?.totalCount ?? 0;
 }

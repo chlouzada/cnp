@@ -12,6 +12,7 @@ export interface GithubRepo {
   html_url: string;
   description: string;
   updated_at: string;
+  pushed_at: string;
   stargazers_count: number;
   language: string;
   clone_url: string;
