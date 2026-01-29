@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack, Tooltip } from "@mantine/core";
+import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack, Tooltip, useMantineColorScheme } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "../global.css";
 import "./Newtab.css";
@@ -15,6 +15,7 @@ const NewTabContent = () => {
   const [token, setToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const { colorScheme } = useMantineColorScheme();
 
   // Hooks do React Query
   const { data: repos = [], isLoading: reposLoading } = useGithubRepos(token);
@@ -64,8 +65,10 @@ const NewTabContent = () => {
     return nameMatch || orgMatch;
   });
 
+  const bgColor = colorScheme === 'dark' ? 'var(--mantine-color-dark-8)' : 'var(--mantine-color-gray-2)';
+
   return (
-    <div style={{ backgroundColor: "var(--mantine-color-gray-2)", minHeight: "100vh", paddingBottom: "2rem" }}>
+    <div style={{ backgroundColor: bgColor, minHeight: "100vh", paddingBottom: "2rem" }}>
       {/* Main Content */}
       <Container size="xl" pt="xl">
         {!token ? (
@@ -125,7 +128,7 @@ const NewTabContent = () => {
 
 export default function NewTab() {
   return (
-    <MantineProvider>
+    <MantineProvider defaultColorScheme="dark">
       <QueryClientProvider client={queryClient}>
         <NewTabContent />
       </QueryClientProvider>

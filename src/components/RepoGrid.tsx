@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon, ThemeIcon, Paper } from "@mantine/core";
+import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon, ThemeIcon, Paper, useMantineColorScheme } from "@mantine/core";
 import { GithubRepo } from "../types/github";
 import { usePrCount } from "../hooks/useGithub";
 import { ActionsModal } from "./ActionsModal";
@@ -54,6 +54,7 @@ const CopyActionButton = ({ text, label }: { text: string; label: string }) => {
 
 export function RepoGrid({ repos, loading, token }: RepoGridProps) {
   const [selectedRepo, setSelectedRepo] = useState<GithubRepo | null>(null);
+  const { colorScheme } = useMantineColorScheme();
 
   if (loading) {
     return (
@@ -157,7 +158,7 @@ export function RepoGrid({ repos, loading, token }: RepoGridProps) {
     <>
       <Paper shadow="sm" radius="md" withBorder style={{ overflow: "hidden" }}>
         <Table verticalSpacing="sm" highlightOnHover striped>
-          <Table.Thead bg="gray.0">
+          <Table.Thead bg={colorScheme === 'dark' ? 'dark.6' : 'gray.0'}>
             <Table.Tr>
               <Table.Th>Repositório</Table.Th>
               <Table.Th>PRs</Table.Th>
