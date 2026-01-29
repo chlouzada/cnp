@@ -1,5 +1,5 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchAllRecentRepos, validateToken, fetchPrCount, fetchRecentActions } from "../services/github";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchAllRecentRepos, validateToken, fetchPrCount, fetchRecentActions, rerunWorkflow } from "../services/github";
 
 export function useGithubRepos(token: string | null) {
   return useQuery({
@@ -26,6 +26,18 @@ export function useRecentActions(token: string | null, owner: string, name: stri
     queryFn: () => fetchRecentActions(token!, owner, name),
     enabled: !!token && enabled,
     staleTime: 1000 * 30, 
+  });
+}
+
+export function useRerunWorkflow() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ token, owner, name, runId }: { token: string; owner: string; name: string; runId: number }) => 
+      rerunWorkflow(token, owner, name, runId),
+    onSuccess: (_, { owner, name }) => {
+      queryClient.invalidateQueries({ queryKey: ["recent-actions", owner, name] });
+    },
   });
 }
 

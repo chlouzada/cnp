@@ -112,3 +112,15 @@ export async function fetchRecentActions(token: string, owner: string, name: str
   const data = await response.json();
   return data.workflow_runs || [];
 }
+
+export async function rerunWorkflow(token: string, owner: string, name: string, runId: number): Promise<boolean> {
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${name}/actions/runs/${runId}/rerun`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return response.ok;
+}

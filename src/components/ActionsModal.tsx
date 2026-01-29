@@ -1,7 +1,7 @@
 import React from "react";
-import { Modal, Text, Group, Badge, Loader, Timeline, Avatar, ThemeIcon, Anchor, Stack } from "@mantine/core";
+import { Modal, Text, Group, Badge, Loader, Timeline, Avatar, ThemeIcon, Anchor, ActionIcon, Tooltip } from "@mantine/core";
 import { GithubRepo } from "../types/github";
-import { useRecentActions } from "../hooks/useGithub";
+import { useRecentActions, useRerunWorkflow } from "../hooks/useGithub";
 
 interface ActionsModalProps {
   repo: GithubRepo | null;
@@ -9,6 +9,33 @@ interface ActionsModalProps {
   opened: boolean;
   onClose: () => void;
 }
+
+// Botão de Rerun com estado de loading local (via mutation)
+const RerunButton = ({ token, owner, name, runId }: { token: string | null; owner: string; name: string; runId: number }) => {
+  const { mutate, isPending } = useRerunWorkflow();
+
+  const handleRerun = () => {
+    if (token) {
+      mutate({ token, owner, name, runId });
+    }
+  };
+
+  return (
+    <Tooltip label="Re-executar Workflow" withArrow>
+      <ActionIcon 
+        variant="subtle" 
+        color="gray" 
+        size="sm" 
+        loading={isPending} 
+        onClick={handleRerun}
+      >
+        <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </ActionIcon>
+    </Tooltip>
+  );
+};
 
 export function ActionsModal({ repo, token, opened, onClose }: ActionsModalProps) {
   const { data: actions, isLoading } = useRecentActions(
@@ -80,15 +107,27 @@ export function ActionsModal({ repo, token, opened, onClose }: ActionsModalProps
               key={action.id} 
               bullet={getStatusIcon(action.status, action.conclusion)}
               title={
-                <Group gap="xs">
-                  <Text size="sm" fw={500} component="span">{action.name}</Text>
-                  <Badge 
-                    size="xs" 
-                    color={getStatusColor(action.status, action.conclusion)} 
-                    variant="light"
-                  >
-                    {action.conclusion || action.status}
-                  </Badge>
+                <Group gap="xs" justify="space-between" align="center">
+                  <Group gap="xs">
+                    <Text size="sm" fw={500} component="span">{action.name}</Text>
+                    <Badge 
+                      size="xs" 
+                      color={getStatusColor(action.status, action.conclusion)} 
+                      variant="light"
+                    >
+                      {action.conclusion || action.status}
+                    </Badge>
+                  </Group>
+                  
+                  {/* Botão de Rerun se falhou */}
+                  {action.conclusion === 'failure' && repo && (
+                    <RerunButton 
+                      token={token} 
+                      owner={repo.owner.login} 
+                      name={repo.name} 
+                      runId={action.id} 
+                    />
+                  )}
                 </Group>
               }
             >
