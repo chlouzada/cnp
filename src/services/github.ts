@@ -1,6 +1,7 @@
 import { GithubOrg, GithubRepo } from "../types/github";
 
 const BASE_URL = "https://api.github.com";
+const PER_PAGE = 100;
 
 export async function validateToken(token: string): Promise<boolean> {
   const response = await fetch(`${BASE_URL}/user`, {
@@ -18,25 +19,63 @@ export async function fetchUserOrgs(token: string): Promise<GithubOrg[]> {
 }
 
 export async function fetchPersonalRepos(token: string): Promise<GithubRepo[]> {
-  const response = await fetch(
-    `${BASE_URL}/user/repos?sort=pushed&direction=desc&per_page=30&type=owner`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
+  let page = 1;
+  let allRepos: GithubRepo[] = [];
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    const response = await fetch(
+      `${BASE_URL}/user/repos?sort=pushed&direction=desc&per_page=${PER_PAGE}&type=owner&page=${page}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (!response.ok) break;
+
+    const repos: GithubRepo[] = await response.json();
+    if (!Array.isArray(repos)) break;
+
+    allRepos = [...allRepos, ...repos];
+
+    if (repos.length < PER_PAGE) {
+      hasNextPage = false;
+    } else {
+      page++;
     }
-  );
-  if (!response.ok) return [];
-  return response.json();
+  }
+
+  return allRepos;
 }
 
 export async function fetchOrgRepos(token: string, orgName: string): Promise<GithubRepo[]> {
-  const response = await fetch(
-    `${BASE_URL}/orgs/${orgName}/repos?sort=pushed&direction=desc&per_page=20`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
+  let page = 1;
+  let allRepos: GithubRepo[] = [];
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    const response = await fetch(
+      `${BASE_URL}/orgs/${orgName}/repos?sort=pushed&direction=desc&per_page=${PER_PAGE}&page=${page}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (!response.ok) break;
+
+    const repos: GithubRepo[] = await response.json();
+    if (!Array.isArray(repos)) break;
+
+    allRepos = [...allRepos, ...repos];
+
+    if (repos.length < PER_PAGE) {
+      hasNextPage = false;
+    } else {
+      page++;
     }
-  );
-  if (!response.ok) return [];
-  return response.json();
+  }
+
+  return allRepos;
 }
 
 export async function fetchAllRecentRepos(token: string): Promise<GithubRepo[]> {
