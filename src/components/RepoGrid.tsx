@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon } from "@mantine/core";
+import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon, ThemeIcon, Paper } from "@mantine/core";
 import { GithubRepo } from "../types/github";
 import { usePrCount } from "../hooks/useGithub";
 import { ActionsModal } from "./ActionsModal";
@@ -79,19 +79,29 @@ export function RepoGrid({ repos, loading, token }: RepoGridProps) {
         <Group gap="sm" wrap="nowrap">
           <Avatar src={repo.owner.avatar_url} size="md" radius="sm" alt={repo.owner.login} />
           <div style={{ minWidth: 0 }}>
-            <Text 
-              component="a" 
-              href={repo.html_url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              fw={600} 
-              size="sm" 
-              c="indigo"
-              style={{ textDecoration: 'none', display: 'block' }}
-              truncate
-            >
-              {repo.name}
-            </Text>
+            <Group gap={6} align="center">
+              <Text 
+                component="a" 
+                href={repo.html_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                fw={600} 
+                size="sm" 
+                c="indigo"
+                style={{ textDecoration: 'none' }}
+                truncate
+              >
+                {repo.name}
+              </Text>
+              <Badge 
+                size="xs" 
+                variant="light" 
+                color={repo.private ? "orange" : "gray"}
+                style={{ textTransform: 'capitalize' }}
+              >
+                {repo.private ? "Private" : "Public"}
+              </Badge>
+            </Group>
             <Text size="xs" c="dimmed" truncate w={300}>
               {repo.description || "Sem descrição"}
             </Text>
@@ -145,18 +155,20 @@ export function RepoGrid({ repos, loading, token }: RepoGridProps) {
 
   return (
     <>
-      <Table verticalSpacing="sm" highlightOnHover striped withTableBorder>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Repositório</Table.Th>
-            <Table.Th>PRs</Table.Th>
-            <Table.Th>Actions</Table.Th>
-            <Table.Th>Pushed At</Table.Th>
-            <Table.Th>Clone</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
+      <Paper shadow="sm" radius="md" withBorder style={{ overflow: "hidden" }}>
+        <Table verticalSpacing="sm" highlightOnHover striped>
+          <Table.Thead bg="gray.0">
+            <Table.Tr>
+              <Table.Th>Repositório</Table.Th>
+              <Table.Th>PRs</Table.Th>
+              <Table.Th>Actions</Table.Th>
+              <Table.Th>Pushed At</Table.Th>
+              <Table.Th>Clone</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>{rows}</Table.Tbody>
+        </Table>
+      </Paper>
 
       <ActionsModal 
         repo={selectedRepo} 

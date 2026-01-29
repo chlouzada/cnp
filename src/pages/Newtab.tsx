@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack } from "@mantine/core";
+import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack, Tooltip } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "../global.css";
 import "./Newtab.css";
 
 import { TokenForm } from "../components/TokenForm";
@@ -16,7 +17,7 @@ const NewTabContent = () => {
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   // Hooks do React Query
-  const { data: repos = [], isLoading: reposLoading, refetch } = useGithubRepos(token);
+  const { data: repos = [], isLoading: reposLoading } = useGithubRepos(token);
   const { mutateAsync: validateTokenMutation, isPending: authLoading, error: authError } = useValidateToken();
 
   // Load token on mount
@@ -64,46 +65,9 @@ const NewTabContent = () => {
   });
 
   return (
-    <div style={{ backgroundColor: "var(--mantine-color-gray-0)", minHeight: "100vh", paddingBottom: "2rem" }}>
-      {/* Header */}
-      <Paper p="md" shadow="xs" component="header" pos="sticky" top={0} style={{ zIndex: 10 }}>
-        <Container size="xl">
-          <Group justify="space-between">
-            <Group gap="xs">
-              <Title order={3} c="indigo">🚀 Dev Dashboard</Title>
-            </Group>
-            
-            {token && (
-              <Group>
-                <ActionIcon 
-                  variant="light" 
-                  color="indigo" 
-                  size="lg" 
-                  onClick={() => refetch()}
-                  loading={reposLoading}
-                  title="Atualizar lista"
-                >
-                  <svg style={{ width: 20, height: 20 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </ActionIcon>
-                
-                <Button 
-                  variant="subtle" 
-                  color="red" 
-                  size="xs" 
-                  onClick={handleReset}
-                >
-                  Sair
-                </Button>
-              </Group>
-            )}
-          </Group>
-        </Container>
-      </Paper>
-
+    <div style={{ backgroundColor: "var(--mantine-color-gray-2)", minHeight: "100vh", paddingBottom: "2rem" }}>
       {/* Main Content */}
-      <Container size="xl" mt="xl">
+      <Container size="xl" pt="xl">
         {!token ? (
           <TokenForm 
             onSave={handleSaveToken} 
@@ -129,9 +93,25 @@ const NewTabContent = () => {
                     variant="unstyled"
                   />
                 </div>
-                <Text size="sm" c="dimmed" style={{ borderLeft: '1px solid var(--mantine-color-gray-2)', paddingLeft: 10 }} visibleFrom="sm">
-                  {filteredRepos.length} repositórios
-                </Text>
+                
+                <Group gap="xs" style={{ borderLeft: '1px solid var(--mantine-color-gray-2)', paddingLeft: 10 }} visibleFrom="sm">
+                  <Text size="sm" c="dimmed">
+                    {filteredRepos.length} repos
+                  </Text>
+                  
+                  <Tooltip label="Sair / Trocar Token" withArrow>
+                    <ActionIcon 
+                      variant="subtle" 
+                      color="red" 
+                      size="md" 
+                      onClick={handleReset}
+                    >
+                      <svg style={{ width: 18, height: 18 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
               </Group>
             </Paper>
             

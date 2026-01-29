@@ -15,6 +15,7 @@ export interface GithubRepo {
   pushed_at: string;
   stargazers_count: number;
   language: string;
+  private: boolean;
   clone_url: string;
   ssh_url: string;
   owner: {
