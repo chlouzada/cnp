@@ -84,3 +84,31 @@ export async function fetchPrCount(token: string, owner: string, name: string): 
   const data = await response.json();
   return data.data?.repository?.pullRequests?.totalCount ?? 0;
 }
+
+export interface WorkflowRun {
+  id: number;
+  name: string;
+  status: string;
+  conclusion: string | null;
+  created_at: string;
+  html_url: string;
+  display_title: string;
+  actor: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
+export async function fetchRecentActions(token: string, owner: string, name: string): Promise<WorkflowRun[]> {
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${name}/actions/runs?per_page=5`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  if (!response.ok) return [];
+  
+  const data = await response.json();
+  return data.workflow_runs || [];
+}

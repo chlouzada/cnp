@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader } from "@mantine/core";
+import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon } from "@mantine/core";
 import { GithubRepo } from "../types/github";
 import { usePrCount } from "../hooks/useGithub";
+import { ActionsModal } from "./ActionsModal";
 
 interface RepoGridProps {
   repos: GithubRepo[];
@@ -9,7 +10,7 @@ interface RepoGridProps {
   token: string | null;
 }
 
-// Componente para exibir contagem de PRs com cache individual
+// Componente para exibir contagem de PRs
 const PrCountBadge = ({ token, owner, name }: { token: string | null; owner: string; name: string }) => {
   const { data: count, isLoading } = usePrCount(token, owner, name);
 
@@ -52,6 +53,8 @@ const CopyActionButton = ({ text, label }: { text: string; label: string }) => {
 };
 
 export function RepoGrid({ repos, loading, token }: RepoGridProps) {
+  const [selectedRepo, setSelectedRepo] = useState<GithubRepo | null>(null);
+
   if (loading) {
     return (
       <Stack gap="xs">
@@ -100,6 +103,26 @@ export function RepoGrid({ repos, loading, token }: RepoGridProps) {
         <PrCountBadge token={token} owner={repo.owner.login} name={repo.name} />
       </Table.Td>
 
+      <Table.Td width={100}>
+        <Tooltip label="Ver Actions Recentes" withArrow>
+          <ActionIcon 
+            variant="light" 
+            color="blue" 
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setSelectedRepo(repo);
+            }}
+          >
+            <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </ActionIcon>
+        </Tooltip>
+      </Table.Td>
+
       <Table.Td width={150}>
         <Text size="xs" c="dimmed">
           {new Date(repo.pushed_at).toLocaleDateString("pt-BR", {
@@ -121,16 +144,26 @@ export function RepoGrid({ repos, loading, token }: RepoGridProps) {
   ));
 
   return (
-    <Table verticalSpacing="sm" highlightOnHover striped withTableBorder>
-      <Table.Thead>
-        <Table.Tr>
-          <Table.Th>Repositório</Table.Th>
-          <Table.Th>PRs</Table.Th>
-          <Table.Th>Atualizado</Table.Th>
-          <Table.Th>Clone</Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>{rows}</Table.Tbody>
-    </Table>
+    <>
+      <Table verticalSpacing="sm" highlightOnHover striped withTableBorder>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Repositório</Table.Th>
+            <Table.Th>PRs</Table.Th>
+            <Table.Th>Actions</Table.Th>
+            <Table.Th>Pushed At</Table.Th>
+            <Table.Th>Clone</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>{rows}</Table.Tbody>
+      </Table>
+
+      <ActionsModal 
+        repo={selectedRepo} 
+        token={token} 
+        opened={!!selectedRepo} 
+        onClose={() => setSelectedRepo(null)} 
+      />
+    </>
   );
 }
