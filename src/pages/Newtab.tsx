@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack, Tooltip, useMantineColorScheme } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import browser from "webextension-polyfill";
 import "../global.css";
 import "./Newtab.css";
 
@@ -21,12 +22,29 @@ const NewTabContent = () => {
   const { data: repos = [], isLoading: reposLoading } = useGithubRepos(token);
   const { mutateAsync: validateTokenMutation, isPending: authLoading, error: authError } = useValidateToken();
 
-  // Load token on mount
+  // Load token on mount and listen for changes
   useEffect(() => {
-    const storedToken = localStorage.getItem("gh_token");
-    if (storedToken) {
-      setToken(storedToken);
-    }
+    // Initial load
+    browser.storage.local.get("ghToken").then((res) => {
+      if (res.ghToken) {
+        setToken(res.ghToken);
+      }
+    });
+
+    // Listen for changes from Popup or other parts
+    const handleStorageChange = (changes: any, area: string) => {
+      if (area === "local" && changes.ghToken) {
+        setToken(changes.ghToken.newValue || null);
+        if (!changes.ghToken.newValue) {
+          queryClient.removeQueries({ queryKey: ["repos"] });
+        }
+      }
+    };
+
+    browser.storage.onChanged.addListener(handleStorageChange);
+    return () => {
+      browser.storage.onChanged.removeListener(handleStorageChange);
+    };
   }, []);
 
   // Focus input when repos load
@@ -40,7 +58,7 @@ const NewTabContent = () => {
     try {
       const isValid = await validateTokenMutation(newToken);
       if (isValid) {
-        localStorage.setItem("gh_token", newToken);
+        await browser.storage.local.set({ ghToken: newToken });
         setToken(newToken);
       } else {
         throw new Error("Token inválido");
@@ -48,13 +66,6 @@ const NewTabContent = () => {
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const handleReset = () => {
-    localStorage.removeItem("gh_token");
-    setToken(null);
-    setSearchQuery("");
-    queryClient.removeQueries({ queryKey: ["repos"] });
   };
 
   // Lógica de Filtragem (Simples)
@@ -101,19 +112,6 @@ const NewTabContent = () => {
                   <Text size="sm" c="dimmed">
                     {filteredRepos.length} repos
                   </Text>
-                  
-                  <Tooltip label="Sair / Trocar Token" withArrow>
-                    <ActionIcon 
-                      variant="subtle" 
-                      color="red" 
-                      size="md" 
-                      onClick={handleReset}
-                    >
-                      <svg style={{ width: 18, height: 18 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                    </ActionIcon>
-                  </Tooltip>
                 </Group>
               </Group>
             </Paper>
