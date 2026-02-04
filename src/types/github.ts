@@ -5,6 +5,14 @@ export interface GithubOrg {
   description: string;
 }
 
+export interface GithubUser {
+  login: string;
+  id: number;
+  avatar_url: string;
+  name: string;
+  html_url: string;
+}
+
 export interface GithubRepo {
   id: number;
   name: string;

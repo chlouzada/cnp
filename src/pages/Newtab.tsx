@@ -7,7 +7,7 @@ import "./Newtab.css";
 
 import { TokenForm } from "../components/TokenForm";
 import { RepoGrid } from "../components/RepoGrid";
-import { useGithubRepos, useValidateToken } from "../hooks/useGithub";
+import { useGithubRepos, useValidateToken, useGithubUser, useGithubOrgs } from "../hooks/useGithub";
 
 // Instância do React Query Client
 const queryClient = new QueryClient();
@@ -20,6 +20,8 @@ const NewTabContent = () => {
 
   // Hooks do React Query
   const { data: repos = [], isLoading: reposLoading } = useGithubRepos(token);
+  const { data: user } = useGithubUser(token);
+  const { data: orgs = [] } = useGithubOrgs(token);
   const { mutateAsync: validateTokenMutation, isPending: authLoading, error: authError } = useValidateToken();
 
   // Load token on mount and listen for changes
@@ -90,6 +92,33 @@ const NewTabContent = () => {
           />
         ) : (
           <Stack gap="lg">
+            {user && (
+              <Group>
+                <Button 
+                  component="a" 
+                  href={`https://github.com/${user.login}?tab=repositories`}
+                  target="_blank"
+                  variant="default"
+                  size="xs"
+                >
+                  My Repos
+                </Button>
+                {orgs.map((org) => (
+                  <Button
+                    key={org.id}
+                    component="a"
+                    href={`https://github.com/orgs/${org.login}/repositories`}
+                    target="_blank"
+                    variant="default"
+                    size="xs"
+                    leftSection={<img src={org.avatar_url} alt={org.login} style={{ width: 16, height: 16, borderRadius: '50%' }} />}
+                  >
+                    {org.login}
+                  </Button>
+                ))}
+              </Group>
+            )}
+
             <Paper p="md" shadow="sm" radius="md">
               <Group align="center" gap="md">
                   <div style={{ flex: 1, position: 'relative' }}>

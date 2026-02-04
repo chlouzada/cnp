@@ -1,5 +1,23 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAllRecentRepos, validateToken, fetchPrCount, fetchRecentActions, rerunWorkflow } from "../services/github";
+import { fetchAllRecentRepos, validateToken, fetchPrCount, fetchRecentActions, rerunWorkflow, fetchUserProfile, fetchUserOrgs } from "../services/github";
+
+export function useGithubUser(token: string | null) {
+  return useQuery({
+    queryKey: ["user", token],
+    queryFn: () => fetchUserProfile(token!),
+    enabled: !!token,
+    staleTime: Infinity,
+  });
+}
+
+export function useGithubOrgs(token: string | null) {
+  return useQuery({
+    queryKey: ["orgs", token],
+    queryFn: () => fetchUserOrgs(token!),
+    enabled: !!token,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+}
 
 export function useGithubRepos(token: string | null) {
   return useQuery({

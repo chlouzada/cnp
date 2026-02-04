@@ -1,4 +1,4 @@
-import { GithubOrg, GithubRepo } from "../types/github";
+import { GithubOrg, GithubRepo, GithubUser } from "../types/github";
 
 const BASE_URL = "https://api.github.com";
 const PER_PAGE = 100;
@@ -8,6 +8,14 @@ export async function validateToken(token: string): Promise<boolean> {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.ok;
+}
+
+export async function fetchUserProfile(token: string): Promise<GithubUser> {
+  const response = await fetch(`${BASE_URL}/user`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Failed to fetch user profile");
+  return response.json();
 }
 
 export async function fetchUserOrgs(token: string): Promise<GithubOrg[]> {
