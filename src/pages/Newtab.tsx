@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { MantineProvider, Container, Title, Button, Group, TextInput, ActionIcon, Paper, Text, Stack, Tooltip, useMantineColorScheme } from "@mantine/core";
+import { MantineProvider, Container, Title, Button, Group, TextInput, Paper, Text, Stack, useMantineColorScheme, Center } from "@mantine/core";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import browser from "webextension-polyfill";
 import "../global.css";
 import "./Newtab.css";
 
-import { TokenForm } from "../components/TokenForm";
 import { RepoGrid } from "../components/RepoGrid";
-import { useGithubRepos, useValidateToken, useGithubUser, useGithubOrgs } from "../hooks/useGithub";
+import { useGithubRepos, useGithubUser, useGithubOrgs } from "../hooks/useGithub";
 
 // Instância do React Query Client
 const queryClient = new QueryClient();
@@ -22,7 +21,6 @@ const NewTabContent = () => {
   const { data: repos = [], isLoading: reposLoading } = useGithubRepos(token);
   const { data: user } = useGithubUser(token);
   const { data: orgs = [] } = useGithubOrgs(token);
-  const { mutateAsync: validateTokenMutation, isPending: authLoading, error: authError } = useValidateToken();
 
   // Load token on mount and listen for changes
   useEffect(() => {
@@ -56,20 +54,6 @@ const NewTabContent = () => {
     }
   }, [token, reposLoading]);
 
-  const handleSaveToken = async (newToken: string) => {
-    try {
-      const isValid = await validateTokenMutation(newToken);
-      if (isValid) {
-        await browser.storage.local.set({ ghToken: newToken });
-        setToken(newToken);
-      } else {
-        throw new Error("Token inválido");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   // Lógica de Filtragem (Simples)
   const filteredRepos = repos.filter((repo) => {
     const query = searchQuery.toLowerCase();
@@ -85,11 +69,14 @@ const NewTabContent = () => {
       {/* Main Content */}
       <Container size="xl" pt="xl">
         {!token ? (
-          <TokenForm 
-            onSave={handleSaveToken} 
-            loading={authLoading} 
-            error={authError ? "Token inválido ou erro de conexão." : undefined}
-          />
+          <Center style={{ height: '80vh' }}>
+            <Paper p="xl" radius="md" withBorder style={{ textAlign: 'center' }}>
+              <Title order={3} mb="md">Welcome to CNP</Title>
+              <Text c="dimmed">
+                Please configure your GitHub Personal Access Token in the extension popup to get started.
+              </Text>
+            </Paper>
+          </Center>
         ) : (
           <Stack gap="lg">
             {user && (

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MantineProvider, Container, Title, Group, Text, SegmentedControl, useMantineColorScheme, Stack, TextInput, Button, ActionIcon } from '@mantine/core';
+import { MantineProvider, Container, Title, Group, Text, SegmentedControl, useMantineColorScheme, Stack, Button, PasswordInput } from '@mantine/core';
 import browser from "webextension-polyfill";
 import "../global.css";
 
@@ -35,26 +35,27 @@ function PopupContent() {
       <Stack gap="md">
         <Title order={4} c="indigo">Extension Settings</Title>
 
-        <TextInput
+        <PasswordInput 
           label="GitHub Token"
           placeholder="ghp_..."
           value={ghToken}
           onChange={handleTokenChange}
-          rightSection={
-            ghToken ? (
-              <ActionIcon variant="subtle" color="gray" onClick={clearInput}>
-                <svg style={{ width: 12, height: 12 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </ActionIcon>
-            ) : null
-          }
         />
 
         {ghToken !== storedToken && (
           <Button fullWidth onClick={saveToken}>
             Save
           </Button>
+        )}
+
+        {storedToken && (
+           <Button fullWidth color="red" variant="outline" onClick={() => {
+             setGhToken('');
+             setStoredToken('');
+             browser.storage.local.remove('ghToken');
+           }}>
+             Delete Token
+           </Button>
         )}
 
         <Group justify="space-between">
