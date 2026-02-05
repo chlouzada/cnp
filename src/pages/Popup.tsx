@@ -9,10 +9,17 @@ function PopupContent() {
   const [storedToken, setStoredToken] = useState('');
 
   useEffect(() => {
-    browser.storage.local.get(['ghToken']).then((result) => {
+    browser.storage.sync.get(['ghToken']).then((result) => {
       if (result.ghToken) {
         setGhToken(result.ghToken as string);
         setStoredToken(result.ghToken as string);
+      } else {
+        browser.storage.local.get(['ghToken']).then((localResult) => {
+          if (localResult.ghToken) {
+            setGhToken(localResult.ghToken as string);
+            setStoredToken(localResult.ghToken as string);
+          }
+        });
       }
     });
   }, []);
@@ -23,6 +30,7 @@ function PopupContent() {
 
   const saveToken = () => {
     browser.storage.local.set({ ghToken });
+    browser.storage.sync.set({ ghToken });
     setStoredToken(ghToken);
   };
 
@@ -53,6 +61,7 @@ function PopupContent() {
              setGhToken('');
              setStoredToken('');
              browser.storage.local.remove('ghToken');
+             browser.storage.sync.remove('ghToken');
            }}>
              Delete Token
            </Button>

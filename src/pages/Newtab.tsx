@@ -25,15 +25,21 @@ const NewTabContent = () => {
   // Load token on mount and listen for changes
   useEffect(() => {
     // Initial load
-    browser.storage.local.get("ghToken").then((res) => {
+    browser.storage.sync.get("ghToken").then((res) => {
       if (res.ghToken) {
         setToken(res.ghToken);
+      } else {
+        browser.storage.local.get("ghToken").then((localRes) => {
+          if (localRes.ghToken) {
+            setToken(localRes.ghToken);
+          }
+        });
       }
     });
 
     // Listen for changes from Popup or other parts
     const handleStorageChange = (changes: any, area: string) => {
-      if (area === "local" && changes.ghToken) {
+      if ((area === "local" || area === "sync") && changes.ghToken) {
         setToken(changes.ghToken.newValue || null);
         if (!changes.ghToken.newValue) {
           queryClient.removeQueries({ queryKey: ["repos"] });
