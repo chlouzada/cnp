@@ -29,11 +29,11 @@ export function useGithubRepos(token: string | null) {
   });
 }
 
-export function usePrCount(token: string | null, owner: string, name: string) {
+export function usePrCount(token: string | null, owner: string, name: string, visible: boolean) {
   return useQuery({
     queryKey: ["pr-count", owner, name],
     queryFn: () => fetchPrCount(token!, owner, name),
-    enabled: !!token,
+    enabled: !!token && visible,
     staleTime: 1000 * 60 * 5, // 5 minutos
   });
 }

@@ -3,6 +3,7 @@ import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Lo
 import { GithubRepo } from "../types/github";
 import { usePrCount } from "../hooks/useGithub";
 import { ActionsModal } from "./ActionsModal";
+import { useInViewport } from "@mantine/hooks";
 
 interface RepoGridProps {
   repos: GithubRepo[];
@@ -12,14 +13,15 @@ interface RepoGridProps {
 
 // Componente para exibir contagem de PRs
 const PrCountBadge = ({ token, owner, name }: { token: string | null; owner: string; name: string }) => {
-  const { data: count, isLoading } = usePrCount(token, owner, name);
+  const { ref, inViewport } = useInViewport();
+  const { data: count, isLoading } = usePrCount(token, owner, name, inViewport);
 
-  if (isLoading) return <Loader size={12} color="gray" />;
+  if (isLoading) return <Loader ref={ref} size={12} color="gray" />;
   
-  if (!count || count === 0) return <Text size="xs" c="dimmed">-</Text>;
+  if (!count || count === 0) return <Text ref={ref} size="xs" c="dimmed">-</Text>;
 
   return (
-    <Badge size="sm" variant="light" color="green">
+    <Badge ref={ref} size="sm" variant="light" color="green">
       {count} Open
     </Badge>
   );
