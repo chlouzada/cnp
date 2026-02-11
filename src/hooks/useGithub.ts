@@ -23,8 +23,8 @@ export function useGithubRepos(token: string | null) {
   return useQuery({
     queryKey: ["repos", token],
     queryFn: () => fetchAllRecentRepos(token!),
-    enabled: !!token, // Só roda se tiver token
-    staleTime: 1000 * 60 * 5, // Cache por 5 minutos
+    enabled: !!token,
+    refetchInterval: 1000 * 15,
     retry: false
   });
 }
@@ -34,7 +34,7 @@ export function usePrCount(token: string | null, owner: string, name: string, vi
     queryKey: ["pr-count", owner, name],
     queryFn: () => fetchPrCount(token!, owner, name),
     enabled: !!token && visible,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchInterval: 1000 * 60 * 5,
   });
 }
 

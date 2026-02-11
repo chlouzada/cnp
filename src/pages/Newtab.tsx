@@ -112,7 +112,7 @@ const NewTabContent = () => {
               </Group>
             )}
 
-            <Paper p="md" shadow="sm" radius="md">
+            <Paper py="xs" px="md" shadow="sm" radius="md">
               <Group align="center" gap="md">
                   <div style={{ flex: 1, position: 'relative' }}>
                   <TextInput
