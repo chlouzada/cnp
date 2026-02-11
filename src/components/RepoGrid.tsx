@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon, ThemeIcon, Paper, useMantineColorScheme } from "@mantine/core";
+import { Table, Text, Group, Avatar, Button, Tooltip, Skeleton, Stack, Badge, Loader, ActionIcon, Paper, useMantineColorScheme } from "@mantine/core";
 import { GithubRepo } from "../types/github";
 import { usePrCount } from "../hooks/useGithub";
 import { ActionsModal } from "./ActionsModal";
@@ -19,13 +19,23 @@ const PrCountBadge = ({ token, owner, name }: { token: string | null; owner: str
   if (isLoading) return <Loader ref={ref} size={12} color="gray" />;
   
   if (!count || count === 0) return <Text ref={ref} size="xs" c="dimmed">-</Text>;
-
+  
   return (
-    <Badge ref={ref} size="sm" variant="light" color="green">
+    <Badge 
+      ref={ref} 
+      size="sm" 
+      variant="light" 
+      color="green"
+      component="a"
+      href={`https://github.com/${owner}/${name}/pulls`}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{ cursor: 'pointer', textDecoration: 'none' }}
+    >
       {count} Open
     </Badge>
   );
-};
+}
 
 // Componente auxiliar para o botão de copiar compacto
 const CopyActionButton = ({ text, label }: { text: string; label: string }) => {
