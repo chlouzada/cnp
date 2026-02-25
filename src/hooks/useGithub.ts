@@ -43,7 +43,7 @@ export function useRecentActions(token: string | null, owner: string, name: stri
     queryKey: ["recent-actions", owner, name],
     queryFn: () => fetchRecentActions(token!, owner, name),
     enabled: !!token && enabled,
-    staleTime: 1000 * 30, 
+    refetchInterval: 15000,
   });
 }
 

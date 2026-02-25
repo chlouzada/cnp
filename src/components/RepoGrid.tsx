@@ -18,21 +18,25 @@ const PrCountBadge = ({ token, owner, name }: { token: string | null; owner: str
 
   if (isLoading) return <Loader ref={ref} size={12} color="gray" />;
   
-  if (!count || count === 0) return <Text ref={ref} size="xs" c="dimmed">-</Text>;
+  const displayCount = count || 0;
   
   return (
     <Badge 
       ref={ref} 
       size="sm" 
-      variant="light" 
-      color="green"
+      variant={displayCount > 0 ? "light" : "outline"} 
+      color={displayCount > 0 ? "green" : "gray"}
       component="a"
       href={`https://github.com/${owner}/${name}/pulls`}
       target="_blank"
       rel="noopener noreferrer"
-      style={{ cursor: 'pointer', textDecoration: 'none' }}
+      style={{ 
+        cursor: 'pointer', 
+        textDecoration: 'none',
+        opacity: displayCount > 0 ? 1 : 0.5
+      }}
     >
-      {count} Open
+      {displayCount} Open
     </Badge>
   );
 }

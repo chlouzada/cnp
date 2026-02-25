@@ -6,10 +6,17 @@ import "../global.css";
 import "./Newtab.css";
 
 import { RepoGrid } from "../components/RepoGrid";
+import { QuickNotes } from "../components/QuickNotes";
 import { useGithubRepos, useGithubUser, useGithubOrgs } from "../hooks/useGithub";
 
 // Instância do React Query Client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchIntervalInBackground: false
+    }
+  }
+});
 
 const NewTabContent = () => {
   const [token, setToken] = useState<string | null>(null);
@@ -142,6 +149,7 @@ const NewTabContent = () => {
           </Stack>
         )}
       </Container>
+      <QuickNotes />
     </div>
   );
 };
